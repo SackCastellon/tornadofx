@@ -171,12 +171,14 @@ class FX {
         var messages: ResourceBundle get() = _messages.get(); set(value) = _messages.set(value)
         fun messagesProperty() = _messages
 
+        var bundleNameResolver: (viewClass: Class<*>?) -> String = { it?.name ?: "Messages" }
+
         /**
          * Load global resource bundle for the current locale. Triggered when the locale changes.
          */
         private fun loadMessages() {
             try {
-                messages = ResourceBundle.getBundle("Messages", locale, FXResourceBundleControl)
+                messages = ResourceBundle.getBundle(bundleNameResolver(null), locale, FXResourceBundleControl)
             } catch (ex: Exception) {
                 log.fine("No global Messages found in locale $locale, using empty bundle")
                 messages = EmptyResourceBundle

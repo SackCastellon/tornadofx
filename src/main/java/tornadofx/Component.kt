@@ -139,7 +139,7 @@ abstract class Component : Configurable {
         override fun get(): ResourceBundle? {
             if (super.get() == null) {
                 try {
-                    val bundle = ResourceBundle.getBundle(this@Component.javaClass.name, FX.locale, this@Component.javaClass.classLoader, FXResourceBundleControl)
+                    val bundle = ResourceBundle.getBundle(FX.bundleNameResolver(this@Component.javaClass), FX.locale, this@Component.javaClass.classLoader, FXResourceBundleControl)
                     (bundle as? FXPropertyResourceBundle)?.inheritFromGlobal()
                     set(bundle)
                 } catch (ex: Exception) {
