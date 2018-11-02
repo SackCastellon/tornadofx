@@ -8,8 +8,10 @@ import javafx.scene.control.Alert
 import javafx.scene.control.Alert.AlertType.INFORMATION
 import tornadofx.*
 
+@ExperimentalCommands
 class CommandTestApp : App(CommandTest::class)
 
+@ExperimentalCommands
 class CommandTest : View("Command test") {
     val ctrl: CommandController by inject()
     val nameProperty = SimpleStringProperty()
@@ -75,6 +77,7 @@ class CommandTest : View("Command test") {
     }
 }
 
+@ExperimentalCommands
 class CommandController : Controller() {
     val helloCommand = command(this::hello, ui = true, nullable = true)
     val squareRootCommand = command(this::squareRoot)
