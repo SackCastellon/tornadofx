@@ -152,14 +152,11 @@ abstract class Component : Configurable {
     private val _messages: SimpleObjectProperty<ResourceBundle> = object : SimpleObjectProperty<ResourceBundle>() {
         override fun get(): ResourceBundle? {
             if (super.get() == null) {
-                try {
-                    val bundle = ResourceBundle.getBundle(this@Component.javaClass.name, FX.locale, this@Component.javaClass.classLoader, FXResourceBundleControl)
-                    (bundle as? FXPropertyResourceBundle)?.inheritFromGlobal()
-                    set(bundle)
-                } catch (ex: Exception) {
-                    FX.log.fine("No Messages found for ${javaClass.name} in locale ${FX.locale}, using global bundle")
-                    set(FX.messages)
-                }
+                this@Component.runCatching { ResourceBundle.getBundle(javaClass.name, FX.locale, javaClass.classLoader, FXResourceBundleControl) }
+                    .onSuccess { (it as? FXPropertyResourceBundle)?.inheritFromGlobal() }
+                    .onFailure { FX.log.fine("No Messages found for ${javaClass.name} in locale ${FX.locale}, using global bundle") }
+                    .getOrDefault(FX.messages)
+                    .let { set(it) }
             }
             return super.get()
         }

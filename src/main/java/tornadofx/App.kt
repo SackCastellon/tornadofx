@@ -111,16 +111,12 @@ open class App(open val primaryView: KClass<out UIComponent> = NoPrimaryViewSpec
      */
     private fun detectDiContainerArgument() {
         parameters?.named?.get("di-container")?.let { diContainerClassName ->
-            val dic = try {
-                Class.forName(diContainerClassName).newInstance()
-            } catch (ex: Exception) {
-                log.warning("Unable to instantiate --di-container=$diContainerClassName: ${ex.message}")
-                null
-            }
-            if (dic is DIContainer)
-                FX.dicontainer = dic
-            else
-                log.warning("--di-container=$diContainerClassName did not resolve to an instance of tornadofx.DIContainer, ignoring assignment")
+            kotlin.runCatching { Class.forName(diContainerClassName).newInstance() }.fold(
+                onFailure = { log.warning("Unable to instantiate --di-container=$diContainerClassName: ${it.message}") },
+                onSuccess = {
+                    if (it is DIContainer) FX.dicontainer = it
+                    else log.warning("--di-container=$diContainerClassName did not resolve to an instance of tornadofx.DIContainer, ignoring assignment")
+                })
         }
     }
 

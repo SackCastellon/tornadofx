@@ -927,13 +927,9 @@ class CssSelectionBlock(op: CssSelectionBlock.() -> Unit) : PropertyHolder(), Se
     init {
         val currentScope = PropertyHolder.selectionScope.get()
         PropertyHolder.selectionScope.set(this)
-        try {
-            op(this)
-        } catch (e: Exception) {
-            // the CSS rule caused an error, do not let the error propagate to
-            // avoid an infinite loop in the error handler
-            log.log(Level.WARNING, "CSS rule caused an error", e)
-        }
+        // the CSS rule caused an error, do not let the error propagate to
+        // avoid an infinite loop in the error handler
+        runCatching(op).onFailure { log.log(Level.WARNING, "CSS rule caused an error", it) }
         PropertyHolder.selectionScope.set(currentScope)
     }
 
@@ -1388,26 +1384,17 @@ fun <T> box(vertical: T, horizontal: T) = CssBox(vertical, horizontal, vertical,
 fun <T> box(top: T, right: T, bottom: T, left: T) = CssBox(top, right, bottom, left)
 data class CssBox<out T>(val top: T, val right: T, val bottom: T, val left: T)
 
-fun c(colorString: String, opacity: Double = 1.0): Color = try {
-    Color.web(colorString, opacity)
-} catch (e: Exception) {
-    Stylesheet.log.warning("Error parsing color c('$colorString', opacity=$opacity)")
-    Color.MAGENTA
-}
+fun c(colorString: String, opacity: Double = 1.0): Color = runCatching { Color.web(colorString, opacity) }
+    .onFailure { Stylesheet.log.warning("Error parsing color c('$colorString', opacity=$opacity)") }
+    .getOrElse { Color.MAGENTA }
 
-fun c(red: Double, green: Double, blue: Double, opacity: Double = 1.0): Color = try {
-    Color.color(red, green, blue, opacity)
-} catch (e: Exception) {
-    Stylesheet.log.warning("Error parsing color c(red=$red, green=$green, blue=$blue, opacity=$opacity)")
-    Color.MAGENTA
-}
+fun c(red: Double, green: Double, blue: Double, opacity: Double = 1.0): Color = runCatching { Color.color(red, green, blue, opacity) }
+    .onFailure { Stylesheet.log.warning("Error parsing color c(red=$red, green=$green, blue=$blue, opacity=$opacity)") }
+    .getOrElse { Color.MAGENTA }
 
-fun c(red: Int, green: Int, blue: Int, opacity: Double = 1.0): Color = try {
-    Color.rgb(red, green, blue, opacity)
-} catch (e: Exception) {
-    Stylesheet.log.warning("Error parsing color c(red=$red, green=$green, blue=$blue, opacity=$opacity)")
-    Color.MAGENTA
-}
+fun c(red: Int, green: Int, blue: Int, opacity: Double = 1.0): Color = runCatching { Color.rgb(red, green, blue, opacity) }
+    .onFailure { Stylesheet.log.warning("Error parsing color c(red=$red, green=$green, blue=$blue, opacity=$opacity)") }
+    .getOrElse { Color.MAGENTA }
 
 fun Color.derive(ratio: Double): Color = if (ratio < 0) interpolate(Color(0.0, 0.0, 0.0, opacity), -ratio) else interpolate(Color(1.0, 1.0, 1.0, opacity), ratio)
 

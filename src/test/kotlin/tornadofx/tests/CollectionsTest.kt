@@ -3,6 +3,7 @@ package tornadofx.tests
 import org.junit.Test
 import tornadofx.*
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -21,11 +22,7 @@ class CollectionsTest {
     fun testMoveWithInvalidIndex() {
         val list = mutableListOf(1, 2, 3, 4)
 
-        try {
-            list.move(2, 102)
-        } catch (e: Exception) {
-            assert(e is IllegalStateException)
-        }
+        assertFailsWith<IllegalStateException> { list.move(2, 102) }
     }
 
     @Test
@@ -62,11 +59,7 @@ class CollectionsTest {
         val list = mutableListOf(1, 2, 3, 4)
         val newIndex = 10
 
-        try {
-            list.moveAt(2, newIndex)
-        } catch (e: Exception) {
-            assert(e is IllegalStateException)
-        }
+        assertFailsWith<IllegalStateException> { list.moveAt(2, newIndex) }
     }
 
 
@@ -74,7 +67,7 @@ class CollectionsTest {
     fun testMoveAllValidIndex() {
         val list = mutableListOf(1, 2, 3, 4, 5)
 
-        list.moveAll(2, { it < 3 })
+        list.moveAll(2) { it < 3 }
 
         assertEquals(mutableListOf(3, 4, 1, 2, 5), list)
     }
@@ -83,11 +76,7 @@ class CollectionsTest {
     fun testMoveAllInvalidIndex() {
         val list = mutableListOf(1, 2, 3, 4, 5)
 
-        try {
-            list.moveAll(101, { it < 3 })
-        } catch (e: Exception) {
-            assert(e is IllegalStateException)
-        }
+        assertFailsWith<IllegalStateException> { list.moveAll(101) { it < 3 } }
     }
 
     @Test
@@ -103,11 +92,7 @@ class CollectionsTest {
     fun testMoveUpAtInvalidIndex() {
         val list = mutableListOf(0, 1, 2, 3, 4)
 
-        try {
-            list.moveUpAt(10)
-        } catch (e: Exception) {
-            assert(e is IllegalStateException)
-        }
+        assertFailsWith<IllegalStateException> { list.moveUpAt(10) }
     }
 
     @Test
@@ -123,11 +108,7 @@ class CollectionsTest {
     fun testMoveDownAtInvalidIndex() {
         val list = mutableListOf(0, 1, 2, 3, 4)
 
-        try {
-            list.moveDownAt(10)
-        } catch (e: Exception) {
-            assert(e is IllegalStateException)
-        }
+        assertFailsWith<IllegalStateException> { list.moveDownAt(10) }
     }
 
     @Test

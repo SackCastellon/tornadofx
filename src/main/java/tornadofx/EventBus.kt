@@ -90,10 +90,8 @@ class EventBus {
                     val count = it.count.andIncrement
                     if (it.maxCount == null || count < it.maxCount) {
                         val context = EventContext()
-                        try {
-                            it.action.invoke(context, event)
-                        } catch (subscriberFailure: Exception) {
-                            log.log(Level.WARNING, "Event $event was delivered to subscriber from ${it.owner}, but invocation resulted in exception", subscriberFailure)
+                        kotlin.runCatching { it.action.invoke(context, event) }.onFailure { e ->
+                            log.log(Level.WARNING, "Event $event was delivered to subscriber from ${it.owner}, but invocation resulted in exception", e)
                         }
                         if (context.unsubscribe) unsubscribe(it)
                     } else {

@@ -405,15 +405,16 @@ class LayoutDebugger : Fragment() {
     class InsetsConverter : StringConverter<Insets>() {
         override fun toString(v: Insets?) = if (v == null) "" else "${v.top.s()} ${v.right.s()} ${v.bottom.s()} ${v.left.s()}"
         override fun fromString(s: String?): Insets {
-            try {
-                if (s.isNullOrBlank()) return Insets.EMPTY
+            if (s.isNullOrBlank()) return Insets.EMPTY
+            return runCatching {
                 val parts = s.split(" ")
-                if (parts.size == 1) return Insets(s.toDouble())
-                if (parts.size == 2) return Insets(parts[0].toDouble(), parts[1].toDouble(), parts[0].toDouble(), parts[1].toDouble())
-                if (parts.size == 4) return Insets(parts[0].toDouble(), parts[1].toDouble(), parts[2].toDouble(), parts[3].toDouble())
-            } catch (ignored: Exception) {
-            }
-            return Insets.EMPTY
+                when {
+                    parts.size == 1 -> Insets(s.toDouble())
+                    parts.size == 2 -> Insets(parts[0].toDouble(), parts[1].toDouble(), parts[0].toDouble(), parts[1].toDouble())
+                    parts.size == 4 -> Insets(parts[0].toDouble(), parts[1].toDouble(), parts[2].toDouble(), parts[3].toDouble())
+                    else -> Insets.EMPTY
+                }
+            }.getOrDefault(Insets.EMPTY)
         }
 
         private fun Double.s(): String {

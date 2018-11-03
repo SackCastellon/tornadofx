@@ -22,15 +22,11 @@ val fxBundleContext: BundleContext get() = fxBundle.bundleContext
  * Try to resolve the OSGi Bundle Id of the given class. This function can only be called
  * if OSGi is available on the classpath.
  */
-fun getBundleId(classFromBundle: KClass<*>): Long? {
-    try {
-        return FrameworkUtil.getBundle(classFromBundle.java)?.bundleId
-    } catch (ex: Exception) {
-        FX.log.log(Level.WARNING, "OSGi was on the classpath but no Framework did not respond correctly", ex)
-        return null
-    }
-}
-inline fun <reified T:Any?> getBundleId(): Long? = getBundleId(T::class)
+fun getBundleId(classFromBundle: KClass<*>): Long? = runCatching { FrameworkUtil.getBundle(classFromBundle.java)?.bundleId }
+    .onFailure { FX.log.log(Level.WARNING, "OSGi was on the classpath but no Framework did not respond correctly", it) }
+    .getOrNull()
+
+inline fun <reified T : Any?> getBundleId(): Long? = getBundleId(T::class)
 
 inline fun <S, T> ServiceTracker<S, T>.withEach(fn: (S) -> Unit) {
     services?.withEach {fn(this as S) }

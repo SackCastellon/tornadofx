@@ -323,43 +323,32 @@ infix fun Number.xy(y: Number) = Point2D(toDouble(), y.toDouble())
 
 fun TableView<out Any>.resizeColumnsToFitContent(resizeColumns: List<TableColumn<*, *>> = contentColumns, maxRows: Int = 50, afterResize: () -> Unit = {}) {
     val doResize = {
-        try {
+        kotlin.runCatching {
             val resizer = skin.javaClass.getDeclaredMethod("resizeColumnToFitContent", TableColumn::class.java, Int::class.java)
             resizer.isAccessible = true
             resizeColumns.forEach {
-                if (it.isVisible)
-                    try {
-                        resizer(skin, it, maxRows)
-                    } catch (ignored: Exception) {
-                    }
+                if (it.isVisible) kotlin.runCatching { resizer(skin, it, maxRows) }
             }
             afterResize()
-        } catch (ex: Throwable) {
-            // Silent for now, it is usually run multiple times
-//            log.warning("Unable to resize columns to content: ${columns.joinToString{ it.text }}")
         }
+        // Silent for now, it is usually run multiple times
+        // log.warning("Unable to resize columns to content: ${columns.joinToString{ it.text }}")
     }
     if (skin == null) skinProperty().onChangeOnce { doResize() } else doResize()
 }
 
 fun <T> TreeTableView<T>.resizeColumnsToFitContent(resizeColumns: List<TreeTableColumn<*, *>> = contentColumns, maxRows: Int = 50, afterResize: () -> Unit = {}) {
     val doResize = {
-        try {
+        kotlin.runCatching {
             val resizer = skin.javaClass.getDeclaredMethod("resizeColumnToFitContent", TreeTableColumn::class.java, Int::class.java)
             resizer.isAccessible = true
             resizeColumns.forEach {
-                if (it.isVisible)
-                    try {
-                        resizer.invoke(skin, it, maxRows)
-                    } catch (ignored: Exception) {
-                    }
+                if (it.isVisible) kotlin.runCatching { resizer(skin, it, maxRows) }
             }
-            afterResize.invoke()
-        } catch (ex: Throwable) {
-            ex.printStackTrace()
-            // Silent for now, it is usually run multiple times
-//            log.warning("Unable to resize columns to content: ${columns.joinToString{ it.text }}")
+            afterResize()
         }
+        // Silent for now, it is usually run multiple times
+        // log.warning("Unable to resize columns to content: ${columns.joinToString{ it.text }}")
     }
     if (skin == null) skinProperty().onChangeOnce { doResize() } else doResize()
 }
